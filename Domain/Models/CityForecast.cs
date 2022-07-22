@@ -1,6 +1,4 @@
-namespace Domain;
-
-//ViewModel
+namespace Domain.Models;
 
 public class CityForecast
 {

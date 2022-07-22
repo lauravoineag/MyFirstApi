@@ -1,4 +1,5 @@
 using System.Reflection;
+using Domain.Contracts;
 using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +11,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMediatR(
-    Assembly.GetExecutingAssembly(),
+    Assembly.GetExecutingAssembly(),//Assembly.Load("Api"));
     Assembly.Load("Domain"));
+builder.Services.AddScoped<IForecaster, Forecaster>();//config DI framework for IForecaster
 
 var app = builder.Build();
 

@@ -1,4 +1,6 @@
 using Domain;
+using Domain.Handlers;
+using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,27 +10,18 @@ namespace MyFirstApi.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private readonly IMediator _mediator;
-    
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
     private static readonly string[] Cities = new[]
     {
         "Vienna", "Copenhagen", "Zurich", "Geneva", "Frankfurt"
     };
+    
+    private readonly IMediator _mediator;
 
-    public WeatherForecastController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    public WeatherForecastController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public async Task<IActionResult> Get([FromQuery]GetWeatherForecast.Command request)
+    public async Task<IActionResult> Get([FromQuery]GetWeatherForecast.Query request)
     {
-        var outcome = await _mediator.Send(request);
         if (request.Days > 14 || request.Days < 1)
         {
             return BadRequest("Weather forecast only available for the next 14 days");
@@ -38,20 +31,9 @@ public class WeatherForecastController : ControllerBase
         {
             return BadRequest("This city is not in our list of cities");
         }
-
-        var weatherForecasts = Enumerable.Range(0, request.Days).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index).ToString("D"),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)],
-            })
-            .ToArray();
-
-        var result = new CityForecast()
-        {
-            City = request.City,
-            WeatherForecasts = weatherForecasts
-        };
+        
+        var result = await _mediator.Send(request);
+        
         return Ok(result);
     }
 }
